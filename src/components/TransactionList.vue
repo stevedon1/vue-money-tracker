@@ -2,26 +2,80 @@
   <div class="transaction-list-container">
     <h2>Your Transactions</h2>
 
-    <!-- Static mock data for now -->
-    <div class="transaction-card">
+    <div
+      v-for="tx in transactions"
+      :key="tx._id"
+      class="transaction-card"
+      :style="{ borderLeftColor: tx.type === 'income' ? '#10b981' : '#ef4444' }"
+    >
       <div class="top-row">
-        <span class="category">Rent</span>
-        <span class="amount income">+ $300</span>
+        <span class="category">{{ tx.category }}</span>
+        <span :class="['amount', tx.type]">
+          {{ tx.type === 'income' ? '+' : '-' }} ${{ tx.amount }}
+        </span>
       </div>
-      <div class="details">
-        <span>Cash</span>
-        <span>April 26, 2025</span>
-      </div>
-      <p class="description">pay may rent</p>
-    </div>
 
-    <!-- Add more dummy cards here if needed for layout testing -->
+      <div class="details">
+        <span>{{ tx.paymentMethod }}</span>
+        <span>{{ formatDate(tx.date) }}</span>
+      </div>
+
+      <p class="description">{{ tx.description }}</p>
+    </div>
   </div>
 </template>
 
+
 <script setup>
-// Logic and dynamic rendering will come after API connection
+import { ref, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
+
+const transactions = ref([])
+const router = useRouter()
+
+// format date
+function formatDate(dateStr) {
+  const date = new Date(dateStr)
+  return date.toLocaleDateString('en-US', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+  })
+}
+
+
+onMounted(async () => {
+  const token = localStorage.getItem('auth_token')
+
+  if (!token) {
+    router.push('/register')
+    return
+  }
+
+  try {
+    const res = await fetch('https://money-tracker-api-l3ud.onrender.com/api/transactions', {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    })
+
+    const data = await res.json()
+
+    if (!res.ok) {
+      throw new Error(data.message || 'Failed to fetch transactions')
+    }
+
+    transactions.value = data
+    console.log('Fetched transactions:', data)
+  } catch (err) {
+    console.error('Error fetching transactions:', err)
+    // Optional: clear token if invalid
+    localStorage.removeItem('token')
+    router.push('/register')
+  }
+})
 </script>
+
 
 <style scoped>
 .transaction-list-container {
