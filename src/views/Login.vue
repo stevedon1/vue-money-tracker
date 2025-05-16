@@ -1,19 +1,23 @@
 <template>
   <div class="login-container">
     <h2>Login</h2>
-    <form class="login-form">
-      <div class="form-group">
-        <label for="email">Email</label>
-        <input type="email" id="email" placeholder="Enter your email" />
-      </div>
+     <form @submit.prevent="handleLogin" class="login-form">
+        <div class="form-group">
+            <label for="email">Email</label>
+            <input v-model="email" type="email" id="email" placeholder="Enter your email" />
+        </div>
 
-      <div class="form-group">
-        <label for="password">Password</label>
-        <input type="password" id="password" placeholder="Enter your password" />
-      </div>
+        <div class="form-group">
+            <label for="password">Password</label>
+            <input v-model="password" type="password" id="password" placeholder="Enter your password" />
+        </div>
 
-      <button type="submit" class="login-button">Login</button>
-    </form>
+        <button type="submit" class="login-button">Login</button>
+     </form>
+
+        <p v-if="error" style="color: red; margin-top: 1rem;">{{ error }}</p>
+        <p v-if="success" style="color: green; margin-top: 1rem;">{{ success }}</p>
+
     <p>
         Dont have an account? 
         <router-link to="/register">
@@ -24,8 +28,57 @@
 </template>
 
 <script setup>
-// No logic yet — we stay on path, one brick at a time
+import { ref } from 'vue'
+import { useRouter } from 'vue-router'
+
+const email = ref('')
+const password = ref('')
+const error = ref('')
+const success = ref('')
+
+const router = useRouter()
+
+const handleLogin = async () => {
+  error.value = ''
+  success.value = ''
+
+  try {
+    const res = await fetch('https://money-tracker-api-l3ud.onrender.com/api/auth/login', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        email: email.value,
+        password: password.value,
+      }),
+    })
+
+    const data = await res.json()
+
+    if (!res.ok) {
+      throw new Error(data.message || 'Login failed')
+    }
+
+    const token = data.token
+    if (token) {
+      localStorage.setItem('auth_token', token)
+    } else {
+      throw new Error('Token not found in response')
+    }
+
+    success.value = 'Login successful! Redirecting...'
+
+    setTimeout(() => {
+      router.push('/')
+    }, 3000)
+
+  } catch (err) {
+    error.value = err.message
+  }
+}
 </script>
+
 
 <style scoped>
 .login-container {

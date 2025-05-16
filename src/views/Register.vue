@@ -1,36 +1,92 @@
 <template>
   <div class="register-container">
     <p>
-        Already have an account? 
-        <router-link to="/login">
-         Login Here
-        </router-link>
+      Already have an account?
+      <router-link to="/login">Login Here</router-link>
     </p>
     <h2>Register New Account</h2>
-    <form class="register-form">
+
+    <form @submit.prevent="handleRegister" class="register-form">
       <div class="form-group">
         <label for="name">Name</label>
-        <input type="text" id="name" placeholder="Enter your name" />
+        <input v-model="name" type="text" id="name" placeholder="Enter your name" />
       </div>
 
       <div class="form-group">
         <label for="email">Email</label>
-        <input type="email" id="email" placeholder="Enter your email" />
+        <input v-model="email" type="email" id="email" placeholder="Enter your email" />
       </div>
 
       <div class="form-group">
         <label for="password">Password</label>
-        <input type="password" id="password" placeholder="Enter your password" />
+        <input v-model="password" type="password" id="password" placeholder="Enter your password" />
       </div>
 
       <button type="submit" class="register-button">Register</button>
     </form>
+
+    <p v-if="error" style="color: red; margin-top: 1rem;">{{ error }}</p>
+    <p v-if="success" style="color: green; margin-top: 1rem;">{{ success }}</p>
   </div>
 </template>
 
 <script setup>
-// No logic here yet — discipline first, then behavior
+import { ref } from 'vue'
+import { useRouter } from 'vue-router'
+
+const name = ref('')
+const email = ref('')
+const password = ref('')
+const error = ref('')
+const success = ref('')
+
+const router = useRouter()
+
+const handleRegister = async () => {
+  error.value = ''
+  success.value = ''
+
+  try {
+    const res = await fetch('https://money-tracker-api-l3ud.onrender.com/api/auth/register', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        name: name.value,
+        email: email.value,
+        password: password.value,
+      }),
+    })
+
+    const data = await res.json()
+
+    if (!res.ok) {
+      throw new Error(data.message || 'Registration failed')
+    }
+
+    // ✅ Store the token in localStorage
+    const token = data.token
+    if (token) {
+      localStorage.setItem('auth_token', token)
+    } else {
+      throw new Error('Token not found in response')
+    }
+
+    success.value = 'Registration successful! Redirecting...'
+
+    // ✅ Redirect to home/dashboard
+    setTimeout(() => {
+      router.push('/')
+    }, 1000)
+
+  } catch (err) {
+    error.value = err.message
+  }
+}
 </script>
+
+
 
 <style scoped>
 .register-container {
