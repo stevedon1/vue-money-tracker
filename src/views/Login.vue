@@ -1,18 +1,7 @@
 <template>
-  <div class="register-container">
-    <p>
-        Already have an account? 
-        <router-link to="/login">
-         Login Here
-        </router-link>
-    </p>
-    <h2>Register New Account</h2>
-    <form class="register-form">
-      <div class="form-group">
-        <label for="name">Name</label>
-        <input type="text" id="name" placeholder="Enter your name" />
-      </div>
-
+  <div class="login-container">
+    <h2>Login</h2>
+    <form class="login-form">
       <div class="form-group">
         <label for="email">Email</label>
         <input type="email" id="email" placeholder="Enter your email" />
@@ -23,17 +12,23 @@
         <input type="password" id="password" placeholder="Enter your password" />
       </div>
 
-      <button type="submit" class="register-button">Register</button>
+      <button type="submit" class="login-button">Login</button>
     </form>
+    <p>
+        Dont have an account? 
+        <router-link to="/register">
+         Register here
+        </router-link>
+    </p>
   </div>
 </template>
 
 <script setup>
-// No logic here yet — discipline first, then behavior
+// No logic yet — we stay on path, one brick at a time
 </script>
 
 <style scoped>
-.register-container {
+.login-container {
   max-width: 400px;
   margin: 3rem auto;
   padding: 2rem;
@@ -47,7 +42,7 @@ h2 {
   margin-bottom: 1.5rem;
 }
 
-.register-form {
+.login-form {
   display: flex;
   flex-direction: column;
   gap: 1rem;
@@ -70,7 +65,7 @@ h2 {
   font-size: 1rem;
 }
 
-.register-button {
+.login-button {
   padding: 0.75rem;
   background-color: #1e40af;
   color: white;
@@ -81,7 +76,7 @@ h2 {
   transition: background-color 0.3s ease;
 }
 
-.register-button:hover {
+.login-button:hover {
   background-color: #1e3a8a;
 }
 </style>
