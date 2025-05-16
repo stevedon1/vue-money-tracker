@@ -71,7 +71,7 @@ const handleLogin = async () => {
 
     setTimeout(() => {
       router.push('/')
-    }, 3000)
+    }, 1000)
 
   } catch (err) {
     error.value = err.message

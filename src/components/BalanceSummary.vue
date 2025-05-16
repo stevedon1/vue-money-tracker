@@ -2,21 +2,66 @@
   <div class="summary-container">
     <div class="summary-box income">
       <h3>Total Income</h3>
-      <p>$0</p> <!-- will be dynamic later -->
+      <p>{{ formatMoney(totalIncome) }}</p>
     </div>
     <div class="summary-box expense">
       <h3>Total Expenses</h3>
-      <p>$0</p>
+      <p>{{ formatMoney(totalExpense) }}</p>
     </div>
     <div class="summary-box balance">
       <h3>Net Balance</h3>
-      <p>$0</p>
+      <p>{{ formatMoney(netBalance) }}</p>
     </div>
   </div>
 </template>
 
 <script setup>
-// Logic will come later — this is the visual strike
+import { ref, computed, onMounted } from 'vue'
+
+const transactions = ref([])
+
+// Fetch transactions on mount
+onMounted(async () => {
+  const token = localStorage.getItem('auth_token') // ensure token name matches
+  if (!token) return
+
+  try {
+    const res = await fetch('https://money-tracker-api-l3ud.onrender.com/api/transactions', {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    })
+    const data = await res.json()
+    if (res.ok) {
+      transactions.value = data
+    }
+  } catch (err) {
+    console.error('Error fetching transactions:', err)
+  }
+})
+
+// Computed totals
+const totalIncome = computed(() =>
+  transactions.value
+    .filter((tx) => tx.type === 'income')
+    .reduce((sum, tx) => sum + tx.amount, 0)
+)
+
+const totalExpense = computed(() =>
+  transactions.value
+    .filter((tx) => tx.type === 'expense')
+    .reduce((sum, tx) => sum + tx.amount, 0)
+)
+
+const netBalance = computed(() => totalIncome.value - totalExpense.value)
+
+// Currency formatter
+const formatMoney = (amount) =>
+  new Intl.NumberFormat('en-US', {
+    style: 'currency',
+    currency: 'USD',
+    minimumFractionDigits: 0,
+  }).format(amount)
 </script>
 
 <style scoped>

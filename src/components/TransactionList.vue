@@ -2,28 +2,36 @@
   <div class="transaction-list-container">
     <h2>Your Transactions</h2>
 
-    <div
-      v-for="tx in transactions"
-      :key="tx._id"
-      class="transaction-card"
-      :style="{ borderLeftColor: tx.type === 'income' ? '#10b981' : '#ef4444' }"
-    >
-      <div class="top-row">
-        <span class="category">{{ tx.category }}</span>
-        <span :class="['amount', tx.type]">
-          {{ tx.type === 'income' ? '+' : '-' }} ${{ tx.amount }}
-        </span>
-      </div>
+    <div v-if="transactions.length > 0">
+      <div
+        v-for="tx in transactions"
+        :key="tx._id"
+        class="transaction-card"
+        :style="{ borderLeftColor: tx.type === 'income' ? '#10b981' : '#ef4444' }"
+      >
+        <div class="top-row">
+          <span class="category">{{ tx.category }}</span>
+          <span :class="['amount', tx.type]">
+            {{ tx.type === 'income' ? '+' : '-' }} ${{ tx.amount }}
+          </span>
+        </div>
 
-      <div class="details">
-        <span>{{ tx.paymentMethod }}</span>
-        <span>{{ formatDate(tx.date) }}</span>
-      </div>
+        <div class="details">
+          <span>{{ tx.paymentMethod }}</span>
+          <span>{{ formatDate(tx.date) }}</span>
+        </div>
 
-      <p class="description">{{ tx.description }}</p>
+        <p class="description">{{ tx.description }}</p>
+      </div>
+    </div>
+
+    <div v-else class="empty-state">
+      <p>You have not added any transactions yet.</p>
+      <router-link to="/add-transaction" class="cta-button">Add Your First Transaction</router-link>
     </div>
   </div>
 </template>
+
 
 
 <script setup>
@@ -48,7 +56,7 @@ onMounted(async () => {
   const token = localStorage.getItem('auth_token')
 
   if (!token) {
-    router.push('/register')
+    router.push('/login')
     return
   }
 
@@ -66,7 +74,7 @@ onMounted(async () => {
     }
 
     transactions.value = data
-    console.log('Fetched transactions:', data)
+    // console.log('Fetched transactions:', data)
   } catch (err) {
     console.error('Error fetching transactions:', err)
     // Optional: clear token if invalid
@@ -122,4 +130,30 @@ onMounted(async () => {
   font-style: italic;
   color: #444;
 }
+
+.empty-state {
+  text-align: center;
+  margin-top: 2rem;
+  padding: 2rem;
+  background-color: #fef3c7;
+  border: 1px dashed #f59e0b;
+  border-radius: 8px;
+}
+
+.cta-button {
+  display: inline-block;
+  margin-top: 1rem;
+  padding: 0.5rem 1.25rem;
+  background-color: #3b82f6;
+  color: white;
+  border-radius: 6px;
+  text-decoration: none;
+  font-weight: bold;
+  transition: background-color 0.2s;
+}
+
+.cta-button:hover {
+  background-color: #2563eb;
+}
+
 </style>

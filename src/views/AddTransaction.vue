@@ -112,7 +112,7 @@ const handleSubmit = async () => {
     // Optional: redirect to home
     setTimeout(() => {
       router.push('/')
-    }, 1000)
+    }, 100)
   } catch (err) {
     error.value = err.message
   }
